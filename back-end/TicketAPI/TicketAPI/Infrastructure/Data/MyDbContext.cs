@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TicketAPI.Domain.Data;
 
-namespace TicketAPI.Domain
+namespace TicketAPI.Infrastructure.Data
 {
     public partial class MyDbContext : DbContext
     {

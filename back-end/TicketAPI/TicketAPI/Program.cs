@@ -1,8 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using TicketAPI.Application.Mapping;
-using TicketAPI.Domain;
 using TicketAPI.Extensions;
+using TicketAPI.Infrastructure.Data;
 using TicketAPI.Middleware;
 
 namespace TicketAPI

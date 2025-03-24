@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TicketAPI.Domain;
 using TicketAPI.Domain.Data;
 using TicketAPI.Domain.Repositories;
+using TicketAPI.Infrastructure.Data;
 
 namespace TicketAPI.Infrastructure.Repositories
 {
