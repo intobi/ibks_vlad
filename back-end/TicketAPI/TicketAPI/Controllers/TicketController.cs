@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TicketAPI.Controllers.Models;
-using TicketAPI.Domain.Data;
-using TicketAPI.Domain.Repositories;
+using TicketAPI.Application.DTO;
+using TicketAPI.Application.Services;
 
 namespace TicketAPI.Controllers
 {
@@ -9,62 +8,56 @@ namespace TicketAPI.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        private readonly ITicketRepository _ticketRepository;
+        private readonly ITicketService _ticketService;
 
-        public TicketController(ITicketRepository ticketRepository)
+        public TicketController(ITicketService ticketService)
         {
-            _ticketRepository = ticketRepository;
+            _ticketService = ticketService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var tickets = await _ticketRepository.GetAllAsync();
+            var tickets = await _ticketService.GetAllTicketsAsync();
             return Ok(tickets);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(long id)
         {
-            var ticket = await _ticketRepository.GetByIdAsync(id);
+            var ticket = await _ticketService.GetTicketByIdAsync(id);
             if (ticket == null)
-            {
                 return NotFound();
-            }
             return Ok(ticket);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Ticket ticket)
+        public async Task<IActionResult> Create([FromBody] CreateTicketDto createTicketDto)
         {
-            if (ticket == null)
+            if (createTicketDto == null)
                 return BadRequest("Invalid ticket data");
 
-            await _ticketRepository.AddAsync(ticket);
-            return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
+            var createdTicket = await _ticketService.CreateTicketAsync(createTicketDto);
+            return CreatedAtAction(nameof(GetById), new { id = createdTicket.Id }, createdTicket);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateTicket updateTicket)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTicketDto updateTicketDto)
         {
-            if (updateTicket == null || id == 0)
+            if (updateTicketDto == null || id == 0)
                 return BadRequest("Invalid ticket data");
 
-            var ticket = await _ticketRepository.GetByIdAsync(id);
-            if (ticket == null)
+            var updated = await _ticketService.UpdateTicketAsync(id, updateTicketDto);
+            if (!updated)
                 return NotFound("Ticket not found");
-
-            ticket.ApplicationName = updateTicket.ApplicationName;
-            ticket.PriorityId = updateTicket.PriorityId;
-            ticket.TicketTypeId = updateTicket.TicketTypeId;
-            ticket.Description = updateTicket.Description;
-
-            await _ticketRepository.UpdateAsync(ticket);
 
             return NoContent();
         }
 
-
+        [HttpGet("test-error")]
+        public IActionResult TestError()
+        {
+            throw new Exception("This is a test error.");
+        }
     }
-
 }

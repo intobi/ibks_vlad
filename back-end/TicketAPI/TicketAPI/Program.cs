@@ -1,7 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
+using TicketAPI.Application.Mapping;
 using TicketAPI.Domain;
 using TicketAPI.Extensions;
+using TicketAPI.Middleware;
 
 namespace TicketAPI
 {
@@ -24,8 +26,7 @@ namespace TicketAPI
             builder.Services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddRepositories();
-
+            builder.Services.ConfigureServices();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -33,6 +34,8 @@ namespace TicketAPI
             var app = builder.Build();
 
             app.UseCors("AllowMyOrigin");
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {

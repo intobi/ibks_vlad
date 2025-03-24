@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TicketAPI.Domain.Data;
-using TicketAPI.Domain.Repositories;
+using TicketAPI.Application.DTO;
+using TicketAPI.Application.Services;
 
 namespace TicketAPI.Controllers
 {
@@ -8,18 +8,18 @@ namespace TicketAPI.Controllers
     [ApiController]
     public class TicketReplyController : ControllerBase
     {
-        private readonly ITicketReplyRepository _ticketReplyRepository;
+        private readonly ITicketReplyService _ticketReplyService;
 
-        public TicketReplyController(ITicketReplyRepository ticketReplyRepository)
+        public TicketReplyController(ITicketReplyService ticketReplyService)
         {
-            _ticketReplyRepository = ticketReplyRepository;
+            _ticketReplyService = ticketReplyService;
         }
 
         [HttpGet("{ticketId}")]
         public async Task<IActionResult> GetRepliesByTicketId(long ticketId)
         {
-            var replies = await _ticketReplyRepository.GetReplyListByTicketIdAsync(ticketId);
-            if (replies == null || replies.Count == 0)
+            var replies = await _ticketReplyService.GetRepliesByTicketIdAsync(ticketId);
+            if (replies == null || !replies.Any())
             {
                 return NotFound();
             }
@@ -27,35 +27,27 @@ namespace TicketAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TicketReply reply)
+        public async Task<IActionResult> Create([FromBody] CreateTicketReplyDto createTicketReplyDto)
         {
-            if (reply == null)
+            if (createTicketReplyDto == null)
                 return BadRequest("Invalid reply data");
 
-            reply.ReplyDate = DateTime.UtcNow;
-
-            await _ticketReplyRepository.AddAsync(reply);
-
+            var reply = await _ticketReplyService.CreateReplyAsync(createTicketReplyDto);
             return StatusCode(201, reply);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TicketReply reply)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTicketReplyDto updateTicketReplyDto)
         {
-            if (reply == null || id != reply.ReplyId)
+            if (updateTicketReplyDto == null)
                 return BadRequest("Invalid reply data");
 
-            var existingReply = await _ticketReplyRepository.GetReplyByIdAsync(id);
-            if (existingReply == null)
+            var updated = await _ticketReplyService.UpdateReplyAsync(id, updateTicketReplyDto);
+            if (!updated)
                 return NotFound("Reply not found");
 
-            existingReply.Reply = reply.Reply;
-            existingReply.ReplyDate = DateTime.UtcNow;
-
-            await _ticketReplyRepository.UpdateAsync(existingReply);
             return NoContent();
         }
-
     }
 
 }
