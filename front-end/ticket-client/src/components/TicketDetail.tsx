@@ -16,10 +16,12 @@ import {
   TextField,
 } from "@mui/material";
 import { UpdateTicket } from "../models/Ticket";
+import { TicketDetails } from "../models/TicketDetail";
+import { isAxiosError } from "axios";
 
 const TicketDetail: React.FC = () => {
   const { id } = useParams();
-  const [ticket, setTicket] = useState<any | null>(null);
+  const [ticket, setTicket] = useState<TicketDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [newReply, setNewReply] = useState("");
   const [type, setType] = useState(0);
@@ -31,6 +33,8 @@ const TicketDetail: React.FC = () => {
   const [urgentLevel, setUrgentLevel] = useState<number>(0);
   const [editReply, setEditReply] = useState<TicketReply | null>(null);
   const [editedReplyText, setEditedReplyText] = useState<string>('');
+
+  const [errors, setErrors] = useState<{ Description?: string }>({});
 
   const navigate = useNavigate();
 
@@ -87,12 +91,25 @@ const TicketDetail: React.FC = () => {
     };
 
     try {
+      setErrors({});
+
       await updateTicket(updatedTicket, ticket.id);
+
       alert("Ticket updated successfully");
       navigate("/");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error updating ticket:", error);
-      alert("Error updating ticket");
+  
+      if (isAxiosError(error)) {
+        if (error.response && error.response.data.errors) {
+          console.error('Response data errors:', error.response.data.errors);
+          setErrors(error.response.data.errors);
+        } else {
+          alert("Error updating ticket: " + error.message);
+        }
+      } else {
+        alert("Unexpected error: " + error);
+      }
     }
   };
 
@@ -241,6 +258,8 @@ const TicketDetail: React.FC = () => {
             rows={4}
             fullWidth
             sx={{ mt: 2 }}
+            error={Boolean(errors.Description)}
+            helperText={errors.Description}
           />
         </Box>
 

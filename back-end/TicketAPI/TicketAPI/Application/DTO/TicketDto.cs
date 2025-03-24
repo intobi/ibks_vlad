@@ -35,7 +35,7 @@ namespace TicketAPI.Application.DTO
     {
         public string ApplicationName { get; set; }
         [Required]
-        [StringLength(10, ErrorMessage = "Description can't be longer than 10 characters.")]
+        [StringLength(250, ErrorMessage = "Description can't be longer than 250 characters.")]
         public string? Description { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "PriorityId must be greater than 0.")]
         public int PriorityId { get; set; }

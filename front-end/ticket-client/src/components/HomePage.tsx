@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTickets } from "../services/ApiService";
+import { Ticket } from "../models/Ticket";
+import { getStatusName, getTicketTypeName } from "../utils/Common";
 import {
   Table,
   TableBody,
@@ -16,9 +18,7 @@ import {
   Paper,
   Grid,
 } from "@mui/material";
-import { Ticket } from "../models/Ticket";
-import PriorityCircle from "./PriorityCircle";
-import { getStatusName, getTicketTypeName } from "../utils/Common";
+import PriorityCircle from "./common/PriorityCircle";
 
 const HomePage: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
